@@ -1,0 +1,27 @@
+.auth-wrap {
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    padding: 24px;
+    background: #f6f7fb;
+}
+
+.form {
+    display: grid;
+    gap: 14px;
+    width: 360px;
+    max-width: 100%;
+}
+
+.field {
+    display: grid;
+    gap: 6px;
+}
+
+.error {
+    color: #c1121f;
+}
+
+.w-full {
+    width: 100%;
+}

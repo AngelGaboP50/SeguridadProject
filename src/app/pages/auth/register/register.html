@@ -1,0 +1,98 @@
+<p-toast></p-toast>
+
+<div class="auth-wrap">
+    <p-card header="Registro">
+        <form [formGroup]="form" (ngSubmit)="submit()" class="form">
+            <div class="grid">
+
+                <!-- Usuario -->
+                <div class="field">
+                    <label>Usuario</label>
+                    <input pInputText formControlName="username" placeholder="usuario123" />
+                    <small class="error" *ngIf="form.controls['username'].touched && form.controls['username'].invalid">
+                        Usuario obligatorio (mínimo 3 caracteres).
+                    </small>
+                </div>
+
+                <!-- Email -->
+                <div class="field">
+                    <label>Email</label>
+                    <input pInputText type="email" formControlName="email" placeholder="correo@ejemplo.com" />
+                    <small class="error" *ngIf="form.controls['email'].touched && form.controls['email'].invalid">
+                        Ingresa un email válido.
+                    </small>
+                </div>
+
+                <!-- Nombre completo -->
+                <div class="field">
+                    <label>Nombre completo</label>
+                    <input pInputText formControlName="fullName" placeholder="Nombre Apellido" />
+                    <small class="error" *ngIf="form.controls['fullName'].touched && form.controls['fullName'].invalid">
+                        Nombre completo obligatorio.
+                    </small>
+                </div>
+
+                <!-- Dirección -->
+                <div class="field">
+                    <label>Dirección</label>
+                    <input pInputText formControlName="address" placeholder="Calle, número, colonia" />
+                    <small class="error" *ngIf="form.controls['address'].touched && form.controls['address'].invalid">
+                        Dirección obligatoria.
+                    </small>
+                </div>
+
+                <!-- Teléfono -->
+                <div class="field">
+                    <label>Teléfono</label>
+                    <input pInputText formControlName="phone" pKeyFilter="int" placeholder="Solo números"
+                        maxlength="10" />
+                    <small class="error" *ngIf="form.controls['phone'].touched && form.controls['phone'].invalid">
+                        Teléfono válido (solo números, mínimo 10 dígitos).
+                    </small>
+                </div>
+
+                <!-- Fecha de nacimiento -->
+                <div class="field">
+                    <label>Fecha de nacimiento</label>
+                    <p-datepicker formControlName="birthDate" [showIcon]="true" dateFormat="dd/mm/yy"></p-datepicker>
+
+                    <small class="error"
+                        *ngIf="form.controls['birthDate'].touched && form.controls['birthDate'].invalid">
+                        Debes ser mayor de edad.
+                    </small>
+                </div>
+
+                <!-- Contraseña -->
+                <div class="field">
+                    <label>Contraseña</label>
+                    <p-password formControlName="password" [toggleMask]="true"></p-password>
+
+                    <small class="hint">
+                        Mínimo 10 caracteres y al menos 1 símbolo especial (! @ # $ % etc.).
+                    </small>
+
+                    <small class="error" *ngIf="form.controls['password'].touched && form.controls['password'].invalid">
+                        Contraseña inválida.
+                    </small>
+                </div>
+
+                <!-- Confirmar contraseña -->
+                <div class="field">
+                    <label>Confirmar contraseña</label>
+                    <p-password formControlName="confirmPassword" [toggleMask]="true" [feedback]="false"></p-password>
+
+                    <small class="error" *ngIf="form.touched && form.errors?.['passwordMismatch']">
+                        Las contraseñas no coinciden.
+                    </small>
+                </div>
+
+            </div>
+
+            <!-- Botón -->
+            <button pButton type="submit" label="Registrarse" class="w-full" [disabled]="form.invalid"
+                [loading]="loading">
+            </button>
+
+        </form>
+    </p-card>
+</div>
