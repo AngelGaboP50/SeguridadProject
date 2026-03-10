@@ -10,6 +10,7 @@ import { Tickets } from './pages/home/tickets/tickets';
 import { Users } from './pages/home/users/users';
 import { Groups } from './pages/home/groups/groups';
 import { GroupTickets } from './pages/home/groups/group-tickets/group-tickets';
+import { AdminUsers } from './pages/home/admin-users/admin-users';
 import { authGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
@@ -26,6 +27,7 @@ export const routes: Routes = [
             { path: 'dashboard', component: Dashboard },
             { path: 'tickets', component: Tickets, canActivate: [authGuard], data: { permission: 'ticket:view' } },
             { path: 'users', component: Users, canActivate: [authGuard], data: { permission: 'user:view' } },
+            { path: 'admin-users', component: AdminUsers, canActivate: [authGuard] },
             { path: 'groups', component: Groups, canActivate: [authGuard], data: { permission: 'group:view' } },
             { path: 'group-tickets', component: GroupTickets, canActivate: [authGuard], data: { permission: 'group:view' } },
         ],

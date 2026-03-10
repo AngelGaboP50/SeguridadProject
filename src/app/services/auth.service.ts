@@ -1,6 +1,6 @@
 import { Injectable, signal } from '@angular/core';
 
-export type UserRole = 'admin' | 'user';
+export type UserRole = 'superAdmin' | 'admin' | 'user';
 
 export interface AppUser {
     username: string;
@@ -17,7 +17,7 @@ export class AuthService {
     currentUser = signal<AppUser | null>(null);
 
     // Usuarios mockeados
-    private readonly MOCK_USERS = [
+    public readonly MOCK_USERS = [
         {
             email: 'pansotic29@gmail.com', // Admin
             pass: 'Admin@12345!',

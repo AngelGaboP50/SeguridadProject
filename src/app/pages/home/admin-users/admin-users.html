@@ -1,0 +1,139 @@
+<div class="page">
+    <header class="head mb-4 flex flex-column md:flex-row justify-content-between md:align-items-center gap-4">
+        <div>
+            <h1>Gestión de Usuarios (Super Admin)</h1>
+            <p>Control total de cuentas y niveles de acceso a nivel global.</p>
+        </div>
+        <br>
+        <p-button label="Nuevo Usuario" icon="pi pi-user-plus" (onClick)="openCreateUser()"></p-button>
+    </header>
+
+    <div class="card bg-white p-4 border-round-xl shadow-1">
+        <p-table [value]="usersList" [paginator]="true" [rows]="10" responsiveLayout="scroll" [rowHover]="true"
+            styleClass="p-datatable-sm">
+            <ng-template pTemplate="header">
+                <tr>
+                    <th pSortableColumn="data.username">Usuario <p-sortIcon field="data.username"></p-sortIcon></th>
+                    <th pSortableColumn="email">Email <p-sortIcon field="email"></p-sortIcon></th>
+                    <th pSortableColumn="data.role">Rol Primario <p-sortIcon field="data.role"></p-sortIcon></th>
+                    <th>Permisos Asignados</th>
+                    <th class="text-right">Acciones</th>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-user>
+                <tr>
+                    <td><b>{{user.data.username}}</b></td>
+                    <td>{{user.email}}</td>
+                    <td>
+                        <p-tag [value]="user.data.role" [severity]="getSeverity(user.data.role)"></p-tag>
+                    </td>
+                    <td>
+                        <span class="text-xs text-color-secondary" *ngIf="user.data.role === 'superAdmin'">
+                            <i class="pi pi-star-fill text-yellow-500 mr-1"></i> Acceso Irrestricto
+                        </span>
+                        <span class="text-xs text-color-secondary" *ngIf="user.data.role !== 'superAdmin'">
+                            {{ user.data.permissions?.length || 0 }} permisos otorgados
+                        </span>
+                    </td>
+                    <td class="text-right flex gap-2 justify-content-end">
+                        <p-button icon="pi pi-pencil" [rounded]="true" [text]="true" (onClick)="editUser(user)"
+                            pTooltip="Editar usuario y permisos" tooltipPosition="left"></p-button>
+                        <p-button icon="pi pi-trash" [rounded]="true" [text]="true" severity="danger"
+                            (onClick)="confirmDeleteOrDelete(user, $event)" pTooltip="Eliminar usuario"
+                            tooltipPosition="left" [disabled]="user.data.role === 'superAdmin'"></p-button>
+                    </td>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="emptymessage">
+                <tr>
+                    <td colspan="5" class="text-center p-4 text-color-secondary">No hay usuarios en el sistema.</td>
+                </tr>
+            </ng-template>
+        </p-table>
+    </div>
+
+    <!-- Modal para Crear / Editar Usuario -->
+    <p-dialog [(visible)]="editDialogVisible" class="user-dialog" [modal]="true"
+        [header]="isNewUser ? 'Crear Nuevo Usuario' : 'Gestionar Perfil y Permisos'"
+        [style]="{ width: '700px', maxWidth: '95vw' }" [draggable]="false" [resizable]="false">
+
+        <div class="flex flex-column gap-4 mt-3" *ngIf="editingUser">
+
+            <!-- Fila 1: Nombres y Correo -->
+            <div class="flex flex-column md:flex-row gap-4">
+                <div class="flex-1 flex flex-column gap-2">
+                    <label for="fname" class="text-sm font-semibold text-color-secondary">Nombre Completo <span
+                            class="text-red-500">*</span></label>
+                    <input pInputText id="fname" class="w-full p-3 border-round-md" [(ngModel)]="editingUser.fullName"
+                        autofocus placeholder="Ej. Juan Pérez" />
+                </div>
+
+                <br>
+                <div class="flex-1 flex flex-column gap-2">
+                    <label for="mail" class="text-sm font-semibold text-color-secondary">Correo Electrónico <span
+                            class="text-red-500">*</span></label>
+                    <input pInputText type="email" id="mail" class="w-full p-3 border-round-md"
+                        [(ngModel)]="editingUser.email" [disabled]="!isNewUser" placeholder="usuario@empresa.com" />
+                </div>
+            </div>
+
+            <br>
+
+            <!-- Fila 2: UserName, Password, Telefono -->
+            <div class="flex flex-column md:flex-row gap-4">
+                <div class="flex-1 flex flex-column gap-2">
+                    <label for="uname" class="text-sm font-semibold text-color-secondary">Usuario</label>
+                    <input pInputText id="uname" class="w-full p-3 border-round-md" [(ngModel)]="editingUser.username"
+                        placeholder="Alias (opcional)" />
+                </div>
+
+                <br>
+                <div class="flex-1 flex flex-column gap-2">
+                    <label for="pwd" class="text-sm font-semibold text-color-secondary">Contraseña <span
+                            class="text-red-500">*</span></label>
+                    <input pInputText id="pwd" class="w-full p-3 border-round-md" [(ngModel)]="editingUser.pass"
+                        placeholder="Mín. 8 caracteres" />
+                </div>
+
+                <br>
+                <div class="flex-1 flex flex-column gap-2">
+                    <label for="tel" class="text-sm font-semibold text-color-secondary">Teléfono</label>
+                    <input pInputText id="tel" class="w-full p-3 border-round-md" [(ngModel)]="editingUser.phone"
+                        placeholder="A 10 dígitos" />
+                </div>
+            </div>
+
+            <br>
+
+            <!-- Fila 3: Rol Primario -->
+            <div class="flex flex-column gap-2 pt-4 border-top-1 surface-border">
+                <label for="role" class="text-lg font-bold m-0 text-color">Nivel de Acceso y Funciones</label>
+                <p class="text-sm text-color-secondary mt-0 mb-3">Asigna el rol "Super Admin" para control irrestricto,
+                    o roles menores para conceder accesos específicos.</p>
+                <p-select [options]="roleOptions" [(ngModel)]="editingUser.role" optionLabel="label" optionValue="value"
+                    appendTo="body" styleClass="w-full" class="w-full"></p-select>
+            </div>
+
+            <br>
+            <!-- Fila 4: Permisos Multi-Select -->
+            <div class="flex flex-column gap-3 surface-ground border-1 surface-border p-4 border-round-xl mt-2"
+                *ngIf="editingUser.role !== 'superAdmin'">
+                <label for="perms" class="font-semibold text-color">Selección de Permisos Múltiples</label><br>
+                <p-multiSelect [options]="availablePermissions" [(ngModel)]="editingUser.permissions"
+                    defaultLabel="Haz clic para seleccionar..." optionLabel="label" optionValue="value" display="chip"
+                    [filter]="false" appendTo="body" styleClass="w-full p-inputtext-lg" class="w-full"></p-multiSelect>
+            </div>
+
+        </div>
+
+        <ng-template pTemplate="footer">
+            <p-button label="Cancelar" icon="pi pi-times" [text]="true" severity="secondary"
+                (onClick)="editDialogVisible = false"></p-button>
+            <p-button label="Guardar Configuración" icon="pi pi-check" (onClick)="saveUser()"
+                [disabled]="!editingUser?.email || !editingUser?.pass || !editingUser?.fullName"></p-button>
+        </ng-template>
+    </p-dialog>
+</div>
+
+<!-- Diálogo de confirmación invisible -->
+<p-confirmDialog></p-confirmDialog>

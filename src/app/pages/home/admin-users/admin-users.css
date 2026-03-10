@@ -1,0 +1,162 @@
+.page {
+    padding: 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.head {
+    border-bottom: 1px solid var(--surface-border);
+    padding-bottom: 1.5rem;
+}
+
+.head h1 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin: 0 0 0.5rem 0;
+    color: var(--text-color);
+}
+
+.head p {
+    color: var(--text-color-secondary);
+    margin: 0;
+}
+
+/* Diálogo principal */
+.user-dialog .p-dialog {
+    border-radius: 1.5rem;
+    /* Bordes más suaves */
+    overflow: hidden;
+    /* Asegura que el contenido respete el borde */
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    /* Sombra más elegante */
+    border: 0;
+    /* Elimina borde por defecto si lo hubiera */
+}
+
+/* Cabecera */
+.user-dialog .p-dialog-header {
+    background: #ffffff;
+    /* Fondo blanco (o el de tu superficie) */
+    border-bottom: 1px solid #e9ecef;
+    /* Línea sutil de separación */
+    padding: 1.5rem 2rem;
+    /* Espaciado interno */
+    font-weight: 600;
+    font-size: 1.25rem;
+    color: #1e293b;
+    /* Texto oscuro */
+    border-top-left-radius: 1.5rem;
+    /* Coherencia con el borde del diálogo */
+    border-top-right-radius: 1.5rem;
+}
+
+/* Contenido */
+.user-dialog .p-dialog-content {
+    padding: 2rem;
+    /* Espacio interior generoso */
+    background: #ffffff;
+}
+
+/* Pie (footer) */
+.user-dialog .p-dialog-footer {
+    background: #f8fafc;
+    /* Fondo ligeramente gris */
+    border-top: 1px solid #e9ecef;
+    /* Línea separadora */
+    padding: 1.25rem 2rem;
+    /* Espaciado */
+    border-bottom-left-radius: 1.5rem;
+    border-bottom-right-radius: 1.5rem;
+}
+
+/* Mejora de inputs de texto (pInputText) */
+.user-dialog .p-inputtext {
+    border: 1px solid #d1d5db;
+    border-radius: 0.75rem;
+    /* Bordes más redondeados */
+    padding: 0.75rem 1rem;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    font-size: 0.95rem;
+    width: 100%;
+    /* Asegura que ocupe todo el ancho */
+}
+
+.user-dialog .p-inputtext:enabled:focus {
+    border-color: #3b82f6;
+    /* Color primario */
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    outline: 0 none;
+}
+
+/* Select y MultiSelect (para que coincidan con los inputs) */
+.user-dialog .p-select,
+.user-dialog .p-multiselect {
+    border-radius: 0.75rem;
+    border: 1px solid #d1d5db;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.user-dialog .p-select:not(.p-disabled):hover,
+.user-dialog .p-multiselect:not(.p-disabled):hover {
+    border-color: #9ca3af;
+}
+
+.user-dialog .p-select:not(.p-disabled).p-focus,
+.user-dialog .p-multiselect:not(.p-disabled).p-focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Etiquetas (chips) dentro del MultiSelect */
+.user-dialog .p-multiselect-token {
+    background: #e0f2fe;
+    /* Fondo azul suave */
+    color: #0369a1;
+    /* Texto azul oscuro */
+    border-radius: 2rem;
+    padding: 0.35rem 0.9rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+/* Botones del footer (p-button) */
+.user-dialog .p-dialog-footer .p-button {
+    border-radius: 2rem;
+    /* Botones pill */
+    padding: 0.6rem 1.5rem;
+    font-weight: 500;
+}
+
+/* Botón primario (Guardar) */
+.user-dialog .p-dialog-footer .p-button.p-button-primary {
+    background: #3b82f6;
+    border: none;
+    box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.3);
+}
+
+.user-dialog .p-dialog-footer .p-button.p-button-primary:hover {
+    background: #2563eb;
+}
+
+/* Botón secundario (Cancelar) */
+.user-dialog .p-dialog-footer .p-button.p-button-secondary {
+    color: #4b5563;
+}
+
+/* Ajustes responsive para pantallas pequeñas */
+@media (max-width: 640px) {
+    .user-dialog .p-dialog {
+        margin: 1rem;
+        width: calc(100% - 2rem) !important;
+        max-width: 100% !important;
+    }
+
+    .user-dialog .p-dialog-content {
+        padding: 1.5rem;
+    }
+
+    .user-dialog .p-dialog-header,
+    .user-dialog .p-dialog-footer {
+        padding: 1rem 1.5rem;
+    }
+}
