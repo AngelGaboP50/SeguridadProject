@@ -158,51 +158,120 @@
 
 
     <!-- Modal Editar Ticket -->
-    <p-dialog [(visible)]="editDialogVisible" [modal]="true" [style]="{ width: '550px' }" header="Detalles del Ticket"
-        [draggable]="false" [resizable]="false" contentStyleClass="p-4">
+    <!-- Modal Editar Ticket -->
+    <p-dialog [(visible)]="editDialogVisible" [modal]="true" [style]="{ width: '850px', maxWidth: '95vw' }"
+        header="Detalles del Ticket" [draggable]="false" [resizable]="false" contentStyleClass="p-4 relative">
 
-        <div class="flex flex-column gap-4" *ngIf="selectedTicket">
-            <div class="flex flex-column gap-2">
-                <label for="title">Título</label>
-                <input pInputText id="title" [(ngModel)]="editingTicket.title" class="w-full" />
-            </div>
+        <div class="flex flex-column lg:flex-row gap-5" *ngIf="selectedTicket">
 
-            <div class="flex flex-column gap-2">
-                <label for="description">Descripción</label>
-                <textarea pTextarea id="description" [(ngModel)]="editingTicket.description" rows="4"
-                    class="w-full"></textarea>
-            </div>
-
-            <div class="flex gap-4">
-                <div class="flex-1 flex flex-column gap-2">
-                    <label for="state">Estado</label>
-                    <p-select [options]="stateOptions" [(ngModel)]="editingTicket.state" optionLabel="label"
-                        optionValue="value" appendTo="body" styleClass="w-full"></p-select>
-                </div>
-                <br>
-                <div class="flex-1 flex flex-column gap-2">
-                    <label for="priority">Prioridad</label>
-                    <p-select [options]="priorityOptions" [(ngModel)]="editingTicket.priority" optionLabel="label"
-                        optionValue="value" appendTo="body" styleClass="w-full"></p-select>
-                </div>
-            </div>
-
-            <div class="flex gap-4">
-                <div class="flex-1 flex flex-column gap-2">
-                    <label for="assignee">Asignado a</label>
-                    <input pInputText id="assignee" [(ngModel)]="editingTicket.assignee" class="w-full" />
+            <!-- Columna Izquierda: Formulario -->
+            <div class="flex-1 flex flex-column gap-4">
+                <div class="flex flex-column gap-2">
+                    <label for="title">Título</label>
+                    <input pInputText id="title" [(ngModel)]="editingTicket.title" class="w-full"
+                        [disabled]="!canEditFull" />
                 </div>
 
-                <br>
-                <div class="flex-1 flex flex-column gap-2">
-                    <label for="dueDate">Fecha Límite</label>
-                    <input pInputText type="date" id="dueDate" [(ngModel)]="editingTicket.dueDate" class="w-full" />
+                <div class="flex flex-column gap-2">
+                    <label for="description">Descripción</label>
+                    <textarea pTextarea id="description" [(ngModel)]="editingTicket.description" rows="3" class="w-full"
+                        [disabled]="!canEditFull"></textarea>
+                </div>
+
+                <div class="flex gap-4">
+                    <div class="flex-1 flex flex-column gap-2">
+                        <label for="state">Estado</label>
+                        <p-select [options]="stateOptions" [(ngModel)]="editingTicket.state" optionLabel="label"
+                            optionValue="value" appendTo="body" styleClass="w-full"
+                            [disabled]="!canEditFull && !canEditStatusOnly"></p-select>
+                    </div>
+                    <div class="flex-1 flex flex-column gap-2">
+                        <label for="priority">Prioridad</label>
+                        <p-select [options]="priorityOptions" [(ngModel)]="editingTicket.priority" optionLabel="label"
+                            optionValue="value" appendTo="body" styleClass="w-full"
+                            [disabled]="!canEditFull"></p-select>
+                    </div>
+                </div>
+
+                <div class="flex gap-4">
+                    <div class="flex-1 flex flex-column gap-2">
+                        <label for="assignee">Asignado a</label>
+                        <input pInputText id="assignee" [(ngModel)]="editingTicket.assignee" class="w-full"
+                            [disabled]="!canEditFull" />
+                    </div>
+                    <div class="flex-1 flex flex-column gap-2">
+                        <label for="dueDate">Fecha Límite</label>
+                        <input pInputText type="date" id="dueDate" [(ngModel)]="editingTicket.dueDate" class="w-full"
+                            [disabled]="!canEditFull" />
+                    </div>
+                </div>
+
+                <div class="flex flex-column gap-2 mt-2">
+                    <label for="llmModel">
+                        Modelo LLM <span class="text-color-secondary font-normal">(Opcional)</span>
+                    </label>
+                    <span class="p-input-icon-left w-full">
+                        <i class="pi pi-sparkles"></i>
+                        <input pInputText id="llmModel" [(ngModel)]="editingTicket.llmModel"
+                            placeholder="ej. gpt-4, claude-3" class="w-full pl-5" [disabled]="!canEditFull" />
+                    </span>
                 </div>
             </div>
+
+            <!-- Columna Derecha: Comentarios e Historial -->
+            <div
+                class="flex-1 flex flex-column gap-4 ticket-sidebar border-top-1 lg:border-top-none lg:border-left-1 surface-border pt-4 lg:pt-0 lg:pl-4">
+
+                <!-- Comentarios -->
+                <div class="comments-section flex flex-column gap-3">
+                    <h3 class="m-0 text-lg font-semibold border-bottom-1 surface-border pb-2">Comentarios</h3>
+                    <div class="comments-list flex flex-column gap-2">
+                        <div *ngIf="!editingTicket.comments?.length" class="text-xs text-color-secondary italic">No hay
+                            comentarios aún.</div>
+                        <div *ngFor="let c of editingTicket.comments" class="comment-bubble">
+                            <div
+                                class="flex justify-content-between text-xs text-color-secondary mb-1 align-items-center">
+                                <b class="text-color opacity-80">{{ c.author }}</b> <span style="font-size: 0.65rem;">{{
+                                    formatDate(c.date) }}</span>
+                            </div>
+                            <div class="text-sm line-height-3">{{ c.text }}</div>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-2 mt-2">
+                        <input pInputText placeholder="Escribe algo..." [(ngModel)]="newCommentText"
+                            class="w-full text-sm" (keyup.enter)="addComment()"
+                            [disabled]="!canEditFull && !canEditStatusOnly" />
+                        <p-button icon="pi pi-send" (onClick)="addComment()"
+                            [disabled]="!newCommentText || (!canEditFull && !canEditStatusOnly)"></p-button>
+                    </div>
+                </div>
+
+                <!-- Historial -->
+                <div class="history-section flex flex-column gap-3 mt-2 flex-grow-1">
+                    <h3 class="m-0 text-lg font-semibold border-bottom-1 surface-border pb-2">Historial de cambios</h3>
+                    <div class="history-list flex flex-column gap-3 h-full">
+                        <div *ngIf="!editingTicket.history?.length" class="text-xs text-color-secondary italic">No hay
+                            registros de historial.</div>
+                        <div *ngFor="let h of editingTicket.history" class="history-item relative">
+                            <div class="history-dot"></div>
+                            <div class="text-xs text-color-secondary mb-1" style="font-size: 0.65rem;">{{
+                                formatDate(h.date) }}</div>
+                            <div class="text-xs font-semibold">{{ h.actor }}</div>
+                            <div class="text-xs text-color-secondary mt-1">{{ h.action }}</div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
         </div>
 
         <ng-template pTemplate="footer">
-            <p-button label="Cancelar" icon="pi pi-times" [text]="true" severity="secondary"
+            <span class="text-xs text-color-secondary mr-auto mt-2" *ngIf="selectedTicket">
+                Creado por: <b>{{selectedTicket.createdBy}}</b>
+            </span>
+            <p-button label="Descartar" icon="pi pi-times" [text]="true" severity="secondary"
                 (onClick)="cancelEdit()"></p-button>
             <p-button label="Guardar" icon="pi pi-check" [text]="true" (onClick)="saveTicket()"></p-button>
         </ng-template>

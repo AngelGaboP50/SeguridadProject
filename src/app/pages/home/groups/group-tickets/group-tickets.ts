@@ -8,8 +8,25 @@ import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
 import { TagModule } from 'primeng/tag';
 import { AvatarModule } from 'primeng/avatar';
+import { DialogModule } from 'primeng/dialog';
+import { InputTextModule } from 'primeng/inputtext';
+import { TextareaModule } from 'primeng/textarea';
 
 import { AuthService } from '../../../../services/auth.service';
+
+export interface TicketComment {
+  author: string;
+  text: string;
+  date: string;
+}
+
+export interface TicketHistory {
+  actor: string;
+  action: string;
+  date: string;
+}
+
+export type PriorityLevel = 'Urgente' | 'Alta' | 'Media Alta' | 'Media' | 'Media Baja' | 'Baja' | 'Muy Baja';
 
 interface GroupItem {
   id: string;
@@ -21,9 +38,15 @@ interface TicketItem {
   groupId: string;
   title: string;
   state: 'Pendiente' | 'En progreso' | 'Revisión' | 'Hecho' | 'Bloqueado';
+  createdBy: string;
   assignee: string;
-  priority: 'Alta' | 'Media' | 'Baja';
+  priority: PriorityLevel;
   createdAt: string;
+  description?: string;
+  dueDate?: string;
+  llmModel?: string;
+  comments: TicketComment[];
+  history: TicketHistory[];
 }
 
 @Component({
@@ -37,7 +60,10 @@ interface TicketItem {
     ButtonModule,
     CardModule,
     TagModule,
-    AvatarModule
+    AvatarModule,
+    DialogModule,
+    InputTextModule,
+    TextareaModule
   ],
   templateUrl: './group-tickets.html',
   styleUrls: ['./group-tickets.css'],
@@ -55,18 +81,16 @@ export class GroupTickets implements OnInit {
 
   selectedGroup: GroupItem | null = null;
 
-  // Mocked tickets (now with groupId and a 'Bloqueado' state)
   allTickets: TicketItem[] = [
-    { id: 'TCK-001', groupId: 'G-004', title: 'Fix login bug', state: 'Pendiente', assignee: 'pansotic29@gmail.com', priority: 'Alta', createdAt: '2026-03-09' },
-    { id: 'TCK-002', groupId: 'G-002', title: 'Update CRM profile', state: 'En progreso', assignee: 'ventas@ejemplo.com', priority: 'Media', createdAt: '2026-03-08' },
-    { id: 'TCK-003', groupId: 'G-004', title: 'Design new dashboard', state: 'Revisión', assignee: 'pansotic29@gmail.com', priority: 'Baja', createdAt: '2026-03-01' },
-    { id: 'TCK-004', groupId: 'G-003', title: 'Support client login issue', state: 'Hecho', assignee: 'soporte@ejemplo.com', priority: 'Media', createdAt: '2026-02-25' },
-    { id: 'TCK-005', groupId: 'G-004', title: 'Investigate DB slow queries', state: 'Bloqueado', assignee: 'pansotic29@gmail.com', priority: 'Alta', createdAt: '2026-03-09' },
-    { id: 'TCK-006', groupId: 'G-001', title: 'Add new user permissions', state: 'Pendiente', assignee: 'admin@ejemplo.com', priority: 'Media', createdAt: '2026-03-10' },
-    { id: 'TCK-007', groupId: 'G-003', title: 'Network outage report', state: 'En progreso', assignee: 'soporte@ejemplo.com', priority: 'Alta', createdAt: '2026-03-10' }
+    { id: 'TCK-001', groupId: 'G-004', title: 'Fix login bug', state: 'Pendiente', createdBy: 'pansotic29@gmail.com', assignee: 'pansotic29@gmail.com', priority: 'Urgente', createdAt: '2026-03-09', comments: [], history: [{ actor: 'pansotic29@gmail.com', action: 'Creado', date: '2026-03-09T09:00:00Z' }] },
+    { id: 'TCK-002', groupId: 'G-002', title: 'Update CRM profile', state: 'En progreso', createdBy: 'pansotic29@gmail.com', assignee: 'ventas@ejemplo.com', priority: 'Media', createdAt: '2026-03-08', comments: [], history: [] },
+    { id: 'TCK-003', groupId: 'G-004', title: 'Design new dashboard', state: 'Revisión', createdBy: 'usuario@ejemplo.com', assignee: 'pansotic29@gmail.com', priority: 'Baja', createdAt: '2026-03-01', comments: [], history: [] },
+    { id: 'TCK-004', groupId: 'G-003', title: 'Support client login issue', state: 'Hecho', createdBy: 'soporte@ejemplo.com', assignee: 'soporte@ejemplo.com', priority: 'Media Alta', createdAt: '2026-02-25', comments: [], history: [] },
+    { id: 'TCK-005', groupId: 'G-004', title: 'Investigate DB slow queries', state: 'Bloqueado', createdBy: 'pansotic29@gmail.com', assignee: 'pansotic29@gmail.com', priority: 'Urgente', createdAt: '2026-03-09', comments: [], history: [] },
+    { id: 'TCK-006', groupId: 'G-001', title: 'Add new user permissions', state: 'Pendiente', createdBy: 'admin@ejemplo.com', assignee: 'admin@ejemplo.com', priority: 'Media', createdAt: '2026-03-10', comments: [], history: [] },
+    { id: 'TCK-007', groupId: 'G-003', title: 'Network outage report', state: 'En progreso', createdBy: 'pansotic29@gmail.com', assignee: 'soporte@ejemplo.com', priority: 'Alta', createdAt: '2026-03-10', comments: [], history: [] }
   ];
 
-  // Lists for the kanban board that belong to the selected group
   pendiente: TicketItem[] = [];
   enProgreso: TicketItem[] = [];
   revision: TicketItem[] = [];
@@ -75,11 +99,41 @@ export class GroupTickets implements OnInit {
 
   connectedLists = ['pendienteList', 'enProgresoList', 'revisionList', 'hechoList', 'bloqueadoList'];
 
-  ngOnInit() {
-    // Opcional: auto-seleccionar el primer grupo
-    // this.selectedGroup = this.groups[0];
-    // this.onGroupChange();
+  stateOptions = [
+    { label: 'Pendiente', value: 'Pendiente' },
+    { label: 'En progreso', value: 'En progreso' },
+    { label: 'Revisión', value: 'Revisión' },
+    { label: 'Hecho', value: 'Hecho' },
+    { label: 'Bloqueado', value: 'Bloqueado' }
+  ];
+
+  priorityOptions = [
+    { label: 'Urgente', value: 'Urgente' },
+    { label: 'Alta', value: 'Alta' },
+    { label: 'Media Alta', value: 'Media Alta' },
+    { label: 'Media', value: 'Media' },
+    { label: 'Media Baja', value: 'Media Baja' },
+    { label: 'Baja', value: 'Baja' },
+    { label: 'Muy Baja', value: 'Muy Baja' }
+  ];
+
+  editDialogVisible = false;
+  selectedTicket: TicketItem | null = null;
+  editingTicket: Partial<TicketItem> = {};
+  newCommentText: string = '';
+  private originalStateForEdit: any = {};
+
+  get canEditFull(): boolean {
+    if (!this.selectedTicket) return false;
+    return this.currentUser.email === this.selectedTicket.createdBy;
   }
+
+  get canEditStatusOnly(): boolean {
+    if (!this.selectedTicket) return false;
+    return this.currentUser.email === this.selectedTicket.assignee && !this.canEditFull;
+  }
+
+  ngOnInit() { }
 
   onGroupChange() {
     this.refreshGroupTickets();
@@ -113,6 +167,9 @@ export class GroupTickets implements OnInit {
     if (event.previousContainer === event.container) {
       moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
     } else {
+      const ticket = event.previousContainer.data[event.previousIndex];
+      const oldState = ticket.state;
+
       transferArrayItem(
         event.previousContainer.data,
         event.container.data,
@@ -120,8 +177,6 @@ export class GroupTickets implements OnInit {
         event.currentIndex
       );
 
-      // Update the ticket state when moved
-      const ticket = event.container.data[event.currentIndex];
       const newStatusId = event.container.id;
 
       let newState: TicketItem['state'] = 'Pendiente';
@@ -133,6 +188,15 @@ export class GroupTickets implements OnInit {
 
       ticket.state = newState;
 
+      if (oldState !== newState) {
+        if (!ticket.history) ticket.history = [];
+        ticket.history.unshift({
+          actor: this.currentUser.email,
+          action: `Movido en tablero de ${oldState} a ${ticket.state}`,
+          date: new Date().toISOString()
+        });
+      }
+
       // Update in the master list as well
       const index = this.allTickets.findIndex(t => t.id === ticket.id);
       if (index !== -1) {
@@ -141,10 +205,81 @@ export class GroupTickets implements OnInit {
     }
   }
 
+  openTicket(ticket: TicketItem) {
+    this.selectedTicket = ticket;
+    this.editingTicket = JSON.parse(JSON.stringify(ticket));
+    this.originalStateForEdit = { ...ticket };
+    this.newCommentText = '';
+    this.editDialogVisible = true;
+  }
+
+  addComment() {
+    if (!this.newCommentText.trim() || !this.editingTicket) return;
+    const comment: TicketComment = {
+      author: this.currentUser.email,
+      text: this.newCommentText,
+      date: new Date().toISOString()
+    };
+    if (!this.editingTicket.comments) this.editingTicket.comments = [];
+    this.editingTicket.comments.push(comment);
+    this.newCommentText = '';
+  }
+
+  saveTicket() {
+    if (this.selectedTicket) {
+      const now = new Date().toISOString();
+      const changes: string[] = [];
+
+      if (this.originalStateForEdit.state !== this.editingTicket.state) {
+        changes.push(`Estado de ${this.originalStateForEdit.state} a ${this.editingTicket.state}`);
+      }
+      if (this.originalStateForEdit.assignee !== this.editingTicket.assignee) {
+        changes.push(`Asignado cambiado a ${this.editingTicket.assignee}`);
+      }
+      if (this.originalStateForEdit.priority !== this.editingTicket.priority) {
+        changes.push(`Prioridad de ${this.originalStateForEdit.priority} a ${this.editingTicket.priority}`);
+      }
+
+      if (changes.length > 0) {
+        if (!this.editingTicket.history) this.editingTicket.history = [];
+        this.editingTicket.history.unshift({
+          actor: this.currentUser.email,
+          action: changes.join(', '),
+          date: now
+        });
+      }
+
+      Object.assign(this.selectedTicket, this.editingTicket);
+      // Sync master list
+      const index = this.allTickets.findIndex(t => t.id === this.selectedTicket!.id);
+      if (index !== -1) {
+        this.allTickets[index] = this.selectedTicket;
+      }
+      this.refreshGroupTickets();
+    }
+    this.editDialogVisible = false;
+    this.selectedTicket = null;
+  }
+
+  cancelEdit() {
+    this.editDialogVisible = false;
+    this.selectedTicket = null;
+  }
+
   getPrioritySeverity(priority: string): 'success' | 'secondary' | 'info' | 'warn' | 'danger' | 'contrast' | undefined {
+    if (priority === 'Urgente') return 'danger';
     if (priority === 'Alta') return 'danger';
+    if (priority === 'Media Alta') return 'warn';
     if (priority === 'Media') return 'warn';
+    if (priority === 'Media Baja') return 'info';
+    if (priority === 'Baja') return 'success';
+    if (priority === 'Muy Baja') return 'secondary';
     return 'info';
+  }
+
+  formatDate(isoString: string): string {
+    const d = new Date(isoString);
+    return d.toLocaleString();
   }
 
   createTicket() {
