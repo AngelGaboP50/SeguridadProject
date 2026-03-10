@@ -104,3 +104,15 @@
         max-width: 260px;
     }
 }
+
+.member-list {
+    background: rgba(0, 0, 0, 0.15);
+}
+
+.member-item {
+    transition: background-color 0.2s;
+}
+
+.member-item:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}

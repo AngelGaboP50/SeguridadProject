@@ -15,6 +15,8 @@ import { TextareaModule } from 'primeng/textarea';
 import { MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
 
+import { AuthService } from '../../../services/auth.service';
+
 type Estatus = 'Activo' | 'Pausado' | 'Inactivo';
 type Nivel = 'Básico' | 'Intermedio' | 'Avanzado';
 
@@ -22,7 +24,7 @@ type GroupRow = {
   nombre: string;
   nivel: Nivel;
   autor: string;
-  integrantes: number;
+  users: { email: string; name: string }[];
   tickets: number;
   descripcion: string;
   estatus: Estatus;
@@ -53,6 +55,9 @@ type GroupRow = {
 })
 export class Groups {
   private msg = inject(MessageService);
+  private auth = inject(AuthService);
+
+  currentUser = this.auth.currentUser();
 
   q = '';
 
@@ -73,7 +78,11 @@ export class Groups {
       nombre: 'Administradores',
       nivel: 'Avanzado',
       autor: 'ERP System',
-      integrantes: 3,
+      users: [
+        { email: 'pansotic29@gmail.com', name: 'Panso TIC' },
+        { email: 'admin2@ejemplo.com', name: 'Admin Dos' },
+        { email: 'admin3@ejemplo.com', name: 'Admin Tres' }
+      ],
       tickets: 12,
       descripcion: 'Acceso total al sistema (demo).',
       estatus: 'Activo'
@@ -82,7 +91,10 @@ export class Groups {
       nombre: 'Ventas',
       nivel: 'Intermedio',
       autor: 'ERP System',
-      integrantes: 8,
+      users: [
+        { email: 'ventas1@ejemplo.com', name: 'Laura Ventas' },
+        { email: 'ventas2@ejemplo.com', name: 'Carlos Ventas' }
+      ],
       tickets: 7,
       descripcion: 'Gestión de ventas y reportes (demo).',
       estatus: 'Activo'
@@ -91,7 +103,10 @@ export class Groups {
       nombre: 'Soporte',
       nivel: 'Intermedio',
       autor: 'ERP System',
-      integrantes: 5,
+      users: [
+        { email: 'soporte1@ejemplo.com', name: 'Ana Soporte' },
+        { email: 'soporte2@ejemplo.com', name: 'Luis Soporte' }
+      ],
       tickets: 21,
       descripcion: 'Atención a incidencias (demo).',
       estatus: 'Activo'
@@ -100,7 +115,9 @@ export class Groups {
       nombre: 'Invitados',
       nivel: 'Básico',
       autor: 'ERP System',
-      integrantes: 14,
+      users: [
+        { email: 'invitado1@ejemplo.com', name: 'Invitado Uno' }
+      ],
       tickets: 0,
       descripcion: 'Acceso limitado (demo).',
       estatus: 'Pausado'
@@ -158,12 +175,39 @@ export class Groups {
     this.msg.add({ severity: 'success', summary: 'Grupo eliminado', detail: 'El grupo ha sido eliminado exitosamente' });
   }
 
+  // --- User Management in Draft ---
+  newUserEmail: string = '';
+
+  addUserToGroup() {
+    if (!this.newUserEmail || !this.newUserEmail.includes('@')) {
+      this.msg.add({ severity: 'error', summary: 'Error', detail: 'Email inválido' });
+      return;
+    }
+
+    // Check if already exists
+    if (this.draft.users.some(u => u.email === this.newUserEmail)) {
+      this.msg.add({ severity: 'warn', summary: 'Usuario Existente', detail: 'Este usuario ya está en el grupo' });
+      return;
+    }
+
+    // Add with a default name for now
+    this.draft.users.unshift({
+      email: this.newUserEmail,
+      name: this.newUserEmail.split('@')[0]
+    });
+    this.newUserEmail = '';
+  }
+
+  removeUserFromGroup(email: string) {
+    this.draft.users = this.draft.users.filter(u => u.email !== email);
+  }
+
   private emptyDraft(): GroupRow {
     return {
       nombre: '',
       nivel: 'Básico',
       autor: 'ERP System',
-      integrantes: 1,
+      users: [],
       tickets: 0,
       descripcion: '',
       estatus: 'Activo'
