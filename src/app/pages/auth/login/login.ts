@@ -80,6 +80,7 @@ export class Login {
       detail: 'Inicio de sesión correcto.'
     });
 
-    this.router.navigateByUrl('/');
+    this.router.navigateByUrl('/home/dashboard');
+
   }
 }

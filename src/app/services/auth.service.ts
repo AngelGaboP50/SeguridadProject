@@ -1,34 +1,75 @@
-import { Injectable } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 
-export type RegisteredUser = {
+export type UserRole = 'admin' | 'user';
+
+export interface AppUser {
     username: string;
     email: string;
-    password: string;
     fullName: string;
-    address: string;
     phone: string;
-    birthDate: Date;
-};
+    role: UserRole;
+    permissions?: string[];
+}
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-    // ✅ Credenciales hardcodeadas para Login
-    private readonly HARDCODED_EMAIL = 'Pansotic29@gmail.com';
-    private readonly HARDCODED_PASSWORD = 'Prueba123*';
+    // usuario actual (null si no hay sesión)
+    currentUser = signal<AppUser | null>(null);
 
-    // ✅ Aquí guardo el registro “en memoria” (y también lo guardo en localStorage)
-    private readonly LS_KEY = 'erp_registered_user';
+    // Usuarios mockeados
+    private readonly MOCK_USERS = [
+        {
+            email: 'pansotic29@gmail.com', // Admin
+            pass: 'Admin@12345!',
+            data: {
+                username: 'admin_panso',
+                email: 'pansotic29@gmail.com',
+                fullName: 'Administrador Panso',
+                phone: '4421234567',
+                role: 'admin' as UserRole,
+                permissions: [
+                    'group:view', 'group:edit', 'group:add', 'group:delete',
+                    'ticket:view', 'ticket:edit', 'ticket:add', 'ticket:delete', 'ticket:edit_state',
+                    'user:view', 'users:view', 'user:edit', 'user:add', 'user:delete'
+                ]
+            }
+        },
+        {
+            email: 'usuario@ejemplo.com', // Common user
+            pass: 'User@12345!',
+            data: {
+                username: 'usuario_demo',
+                email: 'usuario@ejemplo.com',
+                fullName: 'Usuario Demo',
+                phone: '4427654321',
+                role: 'user' as UserRole,
+                permissions: [
+                    'group:view',
+                    'ticket:view',
+                    'ticket:edit_state',
+                    'user:view',
+                    'user:edit'
+                ]
+            }
+        }
+    ];
 
     login(email: string, password: string): boolean {
-        return email === this.HARDCODED_EMAIL && password === this.HARDCODED_PASSWORD;
+        const foundUser = this.MOCK_USERS.find(u => u.email === email && u.pass === password);
+
+        if (!foundUser) return false;
+
+        // aquí “simulamos” datos del usuario
+        this.currentUser.set({ ...foundUser.data });
+
+        return true;
     }
 
-    saveRegister(user: RegisteredUser): void {
-        localStorage.setItem(this.LS_KEY, JSON.stringify(user));
+    logout(): void {
+        this.currentUser.set(null);
     }
 
-    getRegister(): RegisteredUser | null {
-        const raw = localStorage.getItem(this.LS_KEY);
-        return raw ? (JSON.parse(raw) as RegisteredUser) : null;
+    isLoggedIn(): boolean {
+        return this.currentUser() !== null;
     }
 }

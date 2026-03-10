@@ -1,0 +1,102 @@
+.page {
+    padding: 22px;
+    color: #e9eef7;
+}
+
+.head h1 {
+    margin: 0;
+    font-size: 28px;
+}
+
+.head p {
+    margin: 6px 0 18px;
+    opacity: 0.75;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: 1.1fr 1.4fr;
+    gap: 32px;
+    margin-bottom: 32px;
+}
+
+.card :deep(.p-card) {
+    background: rgba(15, 18, 23, 0.72);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    backdrop-filter: blur(10px);
+}
+
+.profileTop {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+}
+
+.meta {
+    flex: 1;
+    min-width: 0;
+}
+
+.nameRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.nameRow h2 {
+    margin: 0;
+    font-size: 20px;
+}
+
+.tags {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.kv {
+    margin-top: 10px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 16px;
+    opacity: 0.92;
+}
+
+.kv .full {
+    grid-column: 1 / -1;
+}
+
+.kv span {
+    opacity: 0.7;
+    margin-right: 6px;
+}
+
+.toolbar {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 10px;
+}
+
+.p-input-icon-left>i {
+    z-index: 10;
+}
+
+.p-input-icon-left>input {
+    padding-left: 2.5rem;
+}
+
+.panel :deep(.p-panel) {
+    margin-top: 32px;
+    background: rgba(15, 18, 23, 0.72);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+@media (max-width: 980px) {
+    .grid {
+        grid-template-columns: 1fr;
+    }
+}

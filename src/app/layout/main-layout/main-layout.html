@@ -1,0 +1,7 @@
+<div class="layout">
+    <app-sidebar [collapsed]="collapsed" [onToggle]="toggleSidebar.bind(this)"></app-sidebar>
+
+    <main class="content" [class.is-collapsed]="collapsed">
+        <router-outlet></router-outlet>
+    </main>
+</div>

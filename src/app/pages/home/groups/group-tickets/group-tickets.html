@@ -1,0 +1,204 @@
+<div class="page">
+    <header class="head">
+        <h1>Dashboard de Grupo</h1>
+        <p>Selecciona un grupo para ver un resumen de sus tickets.</p>
+    </header>
+
+    <div class="dashboard-controls">
+        <div class="group-selector">
+            <span class="font-bold">Grupo:</span>
+            <p-select [options]="groups" optionLabel="nombre" placeholder="Selecciona un grupo"
+                [(ngModel)]="selectedGroup" (onChange)="onGroupChange()">
+            </p-select>
+        </div>
+
+        <p-button label="Crear ticket" icon="pi pi-plus" (onClick)="createTicket()"
+            [disabled]="!selectedGroup"></p-button>
+    </div>
+
+    <!-- Módulo visible solo cuando hay un grupo seleccionado -->
+    <ng-container *ngIf="selectedGroup">
+
+        <!-- Resumen -->
+        <div class="summary-cards">
+            <div class="summary-card">
+                <div class="count">{{ totalTickets }}</div>
+                <div class="label">Total Tickets</div>
+            </div>
+            <div class="summary-card">
+                <div class="count" style="color: var(--blue-500)">{{ pendiente.length }}</div>
+                <div class="label">Pendientes</div>
+            </div>
+            <div class="summary-card">
+                <div class="count" style="color: var(--yellow-500)">{{ enProgreso.length }}</div>
+                <div class="label">En progreso</div>
+            </div>
+            <div class="summary-card">
+                <div class="count" style="color: var(--green-500)">{{ hecho.length }}</div>
+                <div class="label">Hecho</div>
+            </div>
+            <div class="summary-card">
+                <div class="count" style="color: var(--red-500)">{{ bloqueado.length }}</div>
+                <div class="label">Bloqueado</div>
+            </div>
+        </div>
+
+        <!-- Tablero Kanban -->
+        <div class="kanban-board">
+
+            <!-- Pendiente -->
+            <div class="kanban-column">
+                <h3 class="column-header">
+                    Pendiente
+                    <span class="column-count">{{ pendiente.length }}</span>
+                </h3>
+                <div cdkDropList id="pendienteList" [cdkDropListData]="pendiente"
+                    [cdkDropListConnectedTo]="connectedLists" class="kanban-list" (cdkDropListDropped)="drop($event)">
+
+                    <p-card *ngFor="let ticket of pendiente" cdkDrag class="kanban-card">
+                        <ng-template pTemplate="header">
+                            <div class="card-header pt-3 px-3">
+                                <b class="text-sm">{{ ticket.title }}</b>
+                                <p-tag [value]="ticket.priority"
+                                    [severity]="getPrioritySeverity(ticket.priority)"></p-tag>
+                            </div>
+                        </ng-template>
+                        <div class="card-content">
+                            <small>ID: {{ ticket.id }}</small>
+                            <div class="row-details">
+                                <span class="date"><i class="pi pi-calendar"></i> {{ ticket.createdAt }}</span>
+                                <p-avatar [label]="ticket.assignee.charAt(0).toUpperCase()" shape="circle"
+                                    [title]="ticket.assignee"></p-avatar>
+                            </div>
+                        </div>
+                    </p-card>
+                </div>
+            </div>
+
+            <!-- En progreso -->
+            <div class="kanban-column">
+                <h3 class="column-header">
+                    En progreso
+                    <span class="column-count">{{ enProgreso.length }}</span>
+                </h3>
+                <div cdkDropList id="enProgresoList" [cdkDropListData]="enProgreso"
+                    [cdkDropListConnectedTo]="connectedLists" class="kanban-list" (cdkDropListDropped)="drop($event)">
+
+                    <p-card *ngFor="let ticket of enProgreso" cdkDrag class="kanban-card">
+                        <ng-template pTemplate="header">
+                            <div class="card-header pt-3 px-3">
+                                <b class="text-sm">{{ ticket.title }}</b>
+                                <p-tag [value]="ticket.priority"
+                                    [severity]="getPrioritySeverity(ticket.priority)"></p-tag>
+                            </div>
+                        </ng-template>
+                        <div class="card-content">
+                            <small>ID: {{ ticket.id }}</small>
+                            <div class="row-details">
+                                <span class="date"><i class="pi pi-calendar"></i> {{ ticket.createdAt }}</span>
+                                <p-avatar [label]="ticket.assignee.charAt(0).toUpperCase()" shape="circle"
+                                    [title]="ticket.assignee"></p-avatar>
+                            </div>
+                        </div>
+                    </p-card>
+                </div>
+            </div>
+
+            <!-- Revisión -->
+            <div class="kanban-column">
+                <h3 class="column-header">
+                    Revisión
+                    <span class="column-count">{{ revision.length }}</span>
+                </h3>
+                <div cdkDropList id="revisionList" [cdkDropListData]="revision"
+                    [cdkDropListConnectedTo]="connectedLists" class="kanban-list" (cdkDropListDropped)="drop($event)">
+
+                    <p-card *ngFor="let ticket of revision" cdkDrag class="kanban-card">
+                        <ng-template pTemplate="header">
+                            <div class="card-header pt-3 px-3">
+                                <b class="text-sm">{{ ticket.title }}</b>
+                                <p-tag [value]="ticket.priority"
+                                    [severity]="getPrioritySeverity(ticket.priority)"></p-tag>
+                            </div>
+                        </ng-template>
+                        <div class="card-content">
+                            <small>ID: {{ ticket.id }}</small>
+                            <div class="row-details">
+                                <span class="date"><i class="pi pi-calendar"></i> {{ ticket.createdAt }}</span>
+                                <p-avatar [label]="ticket.assignee.charAt(0).toUpperCase()" shape="circle"
+                                    [title]="ticket.assignee"></p-avatar>
+                            </div>
+                        </div>
+                    </p-card>
+                </div>
+            </div>
+
+            <!-- Hecho -->
+            <div class="kanban-column">
+                <h3 class="column-header">
+                    Hecho
+                    <span class="column-count">{{ hecho.length }}</span>
+                </h3>
+                <div cdkDropList id="hechoList" [cdkDropListData]="hecho" [cdkDropListConnectedTo]="connectedLists"
+                    class="kanban-list" (cdkDropListDropped)="drop($event)">
+
+                    <p-card *ngFor="let ticket of hecho" cdkDrag class="kanban-card">
+                        <ng-template pTemplate="header">
+                            <div class="card-header pt-3 px-3">
+                                <b class="text-sm">{{ ticket.title }}</b>
+                                <p-tag [value]="ticket.priority"
+                                    [severity]="getPrioritySeverity(ticket.priority)"></p-tag>
+                            </div>
+                        </ng-template>
+                        <div class="card-content">
+                            <small>ID: {{ ticket.id }}</small>
+                            <div class="row-details">
+                                <span class="date"><i class="pi pi-calendar"></i> {{ ticket.createdAt }}</span>
+                                <p-avatar [label]="ticket.assignee.charAt(0).toUpperCase()" shape="circle"
+                                    [title]="ticket.assignee"></p-avatar>
+                            </div>
+                        </div>
+                    </p-card>
+                </div>
+            </div>
+
+            <!-- Bloqueado -->
+            <div class="kanban-column">
+                <h3 class="column-header">
+                    Bloqueado
+                    <span class="column-count">{{ bloqueado.length }}</span>
+                </h3>
+                <div cdkDropList id="bloqueadoList" [cdkDropListData]="bloqueado"
+                    [cdkDropListConnectedTo]="connectedLists" class="kanban-list" (cdkDropListDropped)="drop($event)">
+
+                    <p-card *ngFor="let ticket of bloqueado" cdkDrag class="kanban-card">
+                        <ng-template pTemplate="header">
+                            <div class="card-header pt-3 px-3">
+                                <b class="text-sm">{{ ticket.title }}</b>
+                                <p-tag [value]="ticket.priority"
+                                    [severity]="getPrioritySeverity(ticket.priority)"></p-tag>
+                            </div>
+                        </ng-template>
+                        <div class="card-content">
+                            <small>ID: {{ ticket.id }}</small>
+                            <div class="row-details">
+                                <span class="date"><i class="pi pi-calendar"></i> {{ ticket.createdAt }}</span>
+                                <p-avatar [label]="ticket.assignee.charAt(0).toUpperCase()" shape="circle"
+                                    [title]="ticket.assignee"></p-avatar>
+                            </div>
+                        </div>
+                    </p-card>
+                </div>
+            </div>
+
+        </div>
+
+    </ng-container>
+
+    <div *ngIf="!selectedGroup" class="p-5 text-center text-500">
+        <i class="pi pi-users" style="font-size: 3rem; margin-bottom: 1rem; color: var(--surface-400)"></i>
+        <h3>Ningún grupo seleccionado</h3>
+        <p>Selecciona un grupo en la parte superior para visualizar sus métricas y tickets.</p>
+    </div>
+
+</div>

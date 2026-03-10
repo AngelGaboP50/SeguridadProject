@@ -1,0 +1,214 @@
+<p-toast></p-toast>
+
+<p-dialog header="Editar Perfil" [(visible)]="editDialogVisible" [modal]="true" [style]="{width: '400px'}">
+    <div class="flex flex-column gap-3 mt-3"
+        style="display: flex; flex-direction: column; gap: 1rem; margin-top: 1rem;">
+        <div class="flex flex-column gap-2" style="display: flex; flex-direction: column; gap: 0.5rem;">
+            <label for="username">Usuario</label>
+            <input pInputText id="username" [(ngModel)]="editingUser.username" placeholder="pansotic29@gmail.com" />
+        </div>
+        <div class="flex flex-column gap-2" style="display: flex; flex-direction: column; gap: 0.5rem;">
+            <label for="email">Email</label>
+            <input pInputText id="email" [(ngModel)]="editingUser.email" placeholder="correo@ejemplo.com" />
+        </div>
+        <div class="flex flex-column gap-2" style="display: flex; flex-direction: column; gap: 0.5rem;">
+            <label for="fullName">Nombre Completo</label>
+            <input pInputText id="fullName" [(ngModel)]="editingUser.fullName" placeholder="Nombre Apellido" />
+        </div>
+        <div class="flex flex-column gap-2" style="display: flex; flex-direction: column; gap: 0.5rem;">
+            <label for="address">Dirección</label>
+            <input pInputText id="address" [(ngModel)]="editingUser.address" placeholder="Calle, número, colonia" />
+        </div>
+        <div class="flex flex-column gap-2" style="display: flex; flex-direction: column; gap: 0.5rem;">
+            <label for="phone">Teléfono</label>
+            <input pInputText id="phone" [(ngModel)]="editingUser.phone" placeholder="Solo números" />
+        </div>
+        <div class="flex flex-column gap-2" style="display: flex; flex-direction: column; gap: 0.5rem;">
+            <label for="birthDate">Fecha de nacimiento</label>
+            <input pInputText id="birthDate" type="date" [(ngModel)]="editingUser.birthDate" />
+        </div>
+    </div>
+    <ng-template pTemplate="footer">
+        <p-button label="Cancelar" icon="pi pi-times" [text]="true" severity="secondary"
+            (onClick)="editDialogVisible = false"></p-button>
+        <p-button label="Guardar" icon="pi pi-check" [text]="true" (onClick)="saveEdit()"></p-button>
+    </ng-template>
+</p-dialog>
+
+<div class="page">
+
+    <header class="head">
+        <h1>Users</h1>
+        <p>Perfil del usuario en sesión.</p>
+    </header>
+
+
+    <!-- PERFIL -->
+    <div class="grid">
+
+        <p-card class="card profile" header="Perfil">
+
+            <div class="profileTop">
+
+                <p-avatar [label]="(currentUser.username || 'U').slice(0,1).toUpperCase()" shape="circle" size="xlarge">
+                </p-avatar>
+
+                <div class="meta">
+
+                    <div class="nameRow">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <h2>{{ currentUser.fullName }}</h2>
+                            <p-button *ngIf="currentUser.permissions.includes('user:edit')" icon="pi pi-pencil"
+                                [rounded]="true" [text]="true" severity="secondary" (onClick)="openEdit()"></p-button>
+                            <p-button *ngIf="currentUser.permissions.includes('user:delete')" label="Dar de baja"
+                                icon="pi pi-user-minus" severity="danger" size="small" [text]="true"
+                                (onClick)="deactivateUser()"></p-button>
+                        </div>
+
+                        <div class="tags">
+
+                            <p-tag [value]="currentUser.role.toUpperCase()" [severity]="roleSeverity(currentUser.role)">
+                            </p-tag>
+
+                            <p-tag [value]="currentUser.status" [severity]="statusSeverity(currentUser.status)">
+                            </p-tag>
+
+                        </div>
+                    </div>
+
+
+                    <div class="kv">
+
+                        <div>
+                            <span>Usuario:</span>
+                            <b>{{ currentUser.username }}</b>
+                        </div>
+
+                        <div>
+                            <span>Email:</span>
+                            <b>{{ currentUser.email }}</b>
+                        </div>
+
+                        <div>
+                            <span>Teléfono:</span>
+                            <b>{{ currentUser.phone }}</b>
+                        </div>
+
+                        <div>
+                            <span>Nacimiento:</span>
+                            <b>{{ currentUser.birthDate }}</b>
+                        </div>
+
+                        <div class="full">
+                            <span>Dirección:</span>
+                            <b>{{ currentUser.address }}</b>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </p-card>
+
+
+
+        <!-- PERMISOS -->
+        <p-card *ngIf="currentUser.permissions.includes('users:view')" class="card" header="Permisos / Accesos">
+
+            <div class="toolbar">
+
+                <span class="p-input-icon-left">
+                    <i class="pi pi-search"></i>
+                    <input pInputText [(ngModel)]="q" placeholder="Filtrar permisos..." />
+                </span>
+
+            </div>
+
+
+            <p-table [value]="filteredPermissions()" [tableStyle]="{ 'min-width': '100%' }" styleClass="p-datatable-sm"
+                [scrollable]="true" scrollHeight="350px">
+
+                <ng-template pTemplate="header">
+                    <tr>
+                        <th>Módulo</th>
+                        <th>Permiso</th>
+                        <th>Rol</th>
+                        <th>Estatus</th>
+                    </tr>
+                </ng-template>
+
+                <ng-template pTemplate="body" let-row>
+
+                    <tr>
+
+                        <td>
+                            {{ row.module || 'General' }}
+                        </td>
+
+                        <td>
+                            {{ row.name }}
+                        </td>
+
+                        <td>
+                            <p-tag [value]="row.role.toUpperCase()" [severity]="roleSeverity(row.role)">
+                            </p-tag>
+                        </td>
+
+                        <td>
+                            <p-tag [value]="row.status" [severity]="statusSeverity(row.status)">
+                            </p-tag>
+                        </td>
+
+                    </tr>
+
+                </ng-template>
+
+            </p-table>
+
+        </p-card>
+
+    </div>
+
+
+
+    <!-- ACTIVIDAD -->
+    <p-panel *ngIf="currentUser.permissions.includes('user:view')" header="Actividad reciente" class="panel">
+
+        <p-table [value]="activity" [tableStyle]="{ 'min-width': '100%' }" styleClass="p-datatable-sm">
+
+            <ng-template pTemplate="header">
+                <tr>
+                    <th>Acción</th>
+                    <th>Fecha</th>
+                    <th>Resultado</th>
+                </tr>
+            </ng-template>
+
+            <ng-template pTemplate="body" let-row>
+
+                <tr>
+
+                    <td>
+                        {{ row.action }}
+                    </td>
+
+                    <td>
+                        {{ row.date }}
+                    </td>
+
+                    <td>
+                        <p-tag [value]="row.status" severity="success">
+                        </p-tag>
+                    </td>
+
+                </tr>
+
+            </ng-template>
+
+        </p-table>
+
+    </p-panel>
+
+</div>

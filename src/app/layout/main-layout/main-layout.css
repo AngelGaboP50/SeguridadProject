@@ -1,0 +1,44 @@
+:host {
+    display: block;
+    height: 100vh;
+}
+
+
+
+
+
+.layout.collapsed {
+    grid-template-columns: 78px 1fr;
+}
+
+
+/* Sidebar */
+.sidebar {
+    width: 260px;
+    min-width: 260px;
+    height: 100vh;
+    background: #111827;
+    border-right: 1px solid rgba(255, 255, 255, 0.06);
+    transition: width 0.3s ease;
+}
+
+/* Cuando esté colapsado */
+.sidebar.collapsed {
+    width: 80px;
+    min-width: 80px;
+}
+
+/* Contenido */
+
+
+.layout {
+    display: flex;
+    min-height: 100vh;
+    background: radial-gradient(circle at 30% 0%, #141b24 0%, #0b0f16 55%, #070a10 100%);
+}
+
+.content {
+    flex: 1;
+    padding: 26px;
+    overflow: auto;
+}
