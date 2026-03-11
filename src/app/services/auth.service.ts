@@ -2,13 +2,41 @@ import { Injectable, signal } from '@angular/core';
 
 export type UserRole = 'superAdmin' | 'admin' | 'user';
 
+// ── Catálogo de permisos ──────────────────────────────────────────────────────
+export const ALL_PERMISSIONS = [
+    // Grupos
+    'group:create', 'group:edit', 'group:delete', 'group:view', 'group:add', 'group:add_member', 'group:remove_member',
+    // Tickets
+    'ticket:create', 'ticket:edit', 'ticket:delete', 'ticket:view', 'ticket:add',
+    'ticket:assign', 'ticket:change_status', 'ticket:edit_state', 'ticket:comment',
+    // Usuarios
+    'user:create', 'user:edit', 'user:add', 'user:delete', 'user:view', 'users:view', 'user:manage_permissions',
+] as const;
+
+export type Permission = typeof ALL_PERMISSIONS[number];
+
+// ── Permisos predefinidos ─────────────────────────────────────────────────────
+const ADMIN_PERMS: Permission[] = [
+    'group:view', 'group:edit', 'group:add', 'group:delete',
+    'ticket:view', 'ticket:edit', 'ticket:add', 'ticket:delete', 'ticket:edit_state',
+    'user:view', 'users:view', 'user:edit', 'user:add', 'user:delete'
+];
+
+const REGULAR_PERMS: Permission[] = [
+    'group:view',
+    'ticket:view',
+    'ticket:edit_state',
+    'user:view',
+    'user:edit'
+];
+
 export interface AppUser {
     username: string;
     email: string;
     fullName: string;
     phone: string;
     role: UserRole;
-    permissions?: string[];
+    permissions?: Permission[];
 }
 
 @Injectable({ providedIn: 'root' })
@@ -27,11 +55,7 @@ export class AuthService {
                 fullName: 'Administrador Panso',
                 phone: '4421234567',
                 role: 'admin' as UserRole,
-                permissions: [
-                    'group:view', 'group:edit', 'group:add', 'group:delete',
-                    'ticket:view', 'ticket:edit', 'ticket:add', 'ticket:delete', 'ticket:edit_state',
-                    'user:view', 'users:view', 'user:edit', 'user:add', 'user:delete'
-                ]
+                permissions: ADMIN_PERMS
             }
         },
         {
@@ -43,13 +67,7 @@ export class AuthService {
                 fullName: 'Usuario Demo',
                 phone: '4427654321',
                 role: 'user' as UserRole,
-                permissions: [
-                    'group:view',
-                    'ticket:view',
-                    'ticket:edit_state',
-                    'user:view',
-                    'user:edit'
-                ]
+                permissions: REGULAR_PERMS
             }
         }
     ];

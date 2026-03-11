@@ -1,6 +1,6 @@
 import { inject } from '@angular/core';
 import { Router, type CanActivateFn } from '@angular/router';
-import { AuthService } from '../services/auth.service';
+import { AuthService, Permission } from '../services/auth.service';
 
 export const authGuard: CanActivateFn = (route, state) => {
     const auth = inject(AuthService);
@@ -15,7 +15,7 @@ export const authGuard: CanActivateFn = (route, state) => {
         return true;
     }
 
-    const requiredPermission = route.data?.['permission'] as string;
+    const requiredPermission = route.data?.['permission'] as Permission;
     if (!requiredPermission) {
         // If no specific permission is required, let them through
         return true;

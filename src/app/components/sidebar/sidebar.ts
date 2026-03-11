@@ -3,7 +3,7 @@ import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule } from '@angular/common';
 
 import { ButtonModule } from 'primeng/button';
-import { AuthService } from '../../services/auth.service';
+import { AuthService, Permission } from '../../services/auth.service';
 
 @Component({
   selector: 'app-sidebar',
@@ -29,7 +29,7 @@ export class SidebarComponent {
     this.groupsMenuExpanded = !this.groupsMenuExpanded;
   }
 
-  canView(permission: string): boolean {
+  canView(permission: Permission): boolean {
     const user = this.auth.currentUser();
     if (!user) return false;
     if (user.role === 'admin') return true;
